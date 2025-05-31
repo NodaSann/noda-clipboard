@@ -1,0 +1,123 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+.bg {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #E4EDF0;
+    /* opacity: 0.5; */
+    pointer-events: none;
+}
+
+.title {
+    width: 100vw;
+    height: 10%;
+    background-color: #728C93;
+    position: fixed;
+    top: 0;
+    color: #FFFFFF;
+    padding: 20px 15px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.git {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    position: fixed;
+    right: -35px;
+    top: -35px;
+}
+
+.box {
+    width: 80vw;
+    height: 70vh;
+    margin: 14vh auto 0;
+    text-align: center;
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.26);
+    overflow: hidden;
+}
+
+#message {
+    width: 50vw;
+    height: 60vh;
+    position: absolute;
+    left: 4vw;
+    white-space: pre-wrap;
+    /* 允许长单词或URL在到达边界时自动换行 */
+    overflow-wrap: break-word;
+    /* 当单词太长而无法在容器内换行时，允许单词断开 */
+    max-width: 100%;
+    /* 设置最大宽度为容器的100% */
+    /* float: left; */
+    font-size: 18px;
+    line-height: 25px;
+    padding: 15px;
+    box-sizing: border-box;
+    background-color: transparent;
+    transition: 0.5 all;
+    background-color: #ffffff;
+    color: rgb(0, 0, 0);
+}
+
+.menu {
+    width: 20vw;
+    height: 60vh;
+    background-color: #E4EDF0;
+    position: absolute;
+    right: 4vw;
+    /* float: left; */
+}
+
+#submit {
+    width: 80%;
+    height: 10%;
+    margin-top: 5%;
+    background-color: #728C93;
+    border: 2px outset rgba(19, 131, 103, 0.651);
+    font-size: 20px;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#submit:hover {
+    background-color: #FFFFFF;
+    color: #728C93;
+    border: 2px inset rgba(230, 230, 230, 0.651);
+}
+
+.menu h4 {
+    margin-top: 40px;
+}
+
+.menu #hid {
+    position: absolute;
+    top: 90%;
+    left: 10px;
+}
+
+#head {
+    color: #053a32;
+}
+
+.render {
+    color: #728C93;
+}
+a{
+    font-weight: 800;
+    color: #7dca24;
+}
+
+#page-title {
+    text-decoration: none;
+    color: #FFFFFF;
+}

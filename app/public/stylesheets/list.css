@@ -1,0 +1,179 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+.bg {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #E4EDF0;
+    pointer-events: none;
+}
+
+.title {
+    width: 100vw;
+    height: 10%;
+    background-color: #728C93;
+    position: fixed;
+    top: 0;
+    color: #FFFFFF;
+    padding: 20px 15px;
+    box-sizing: border-box;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.git {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    position: fixed;
+    right: -35px;
+    top: -35px;
+}
+
+.box {
+    width: 80vw;
+    height: 65vh;
+    margin: 14vh auto 0;
+    text-align: center;
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.26);
+    overflow: hidden;
+}
+
+.list {
+    /* border: #728C93 2px solid; */
+    width: 80vw;
+    margin: 14vh auto 0;
+    position: relative;
+}
+
+.item {
+    /* border: #053a32 2px solid; */
+    width: 90%;
+    padding-left: 20px;
+    padding-top: 20px;
+    padding-bottom: 30px;
+    position: relative;
+}
+
+.message {
+    width: 100%;
+    font-size: 15px;
+    color: #053a32;
+    font-weight: 400;
+    /* white-space:pre-wrap     */
+    overflow: scroll;
+    /* 自动换行-打断单词(不打断的话，对于无序的字母串是断不开的) */
+    word-wrap:break-word;
+}
+
+.date {
+    position: absolute;
+    right: -20px;
+    bottom: 4px;
+    font-size: 20px;
+    color: #728C93;
+}
+
+.sign {
+    font-weight: 800;
+    font-family: Arial;
+    font-size: 38px;
+    color: #0abab49c;
+}
+
+.list .delete {
+    position: absolute;
+    top: -40px;
+    right: 10px;
+}
+
+.delete {
+    text-decoration: none;
+    font-family: Arial;
+    font-weight: 600;
+    font-size: 15px;
+    color: #205a4d;
+}
+
+.page_h1 #page-title {
+    text-decoration: none;
+    color: #FFFFFF;
+    display: inline-block;
+    width: 100%;
+}
+
+.item button {
+    position: absolute;
+    right: 2px;
+    top: -8px;
+    font-size: 20px;
+    border: none;
+    font-family: Arial;
+    border-radius: 6px;
+    padding: 0px 8px;
+    background-color:#ffffff96;
+    color: #f3c0a9;
+    border: #f3d2c36b 2px solid;
+    transition: all,1s;   
+    cursor: pointer;
+}
+
+.item button:hover{
+    background-color:#F3D2C3;
+    color: #ffffff;
+}
+
+#Copy_msg{
+    width: 20vw;
+    height: 8vh;
+    background-color:#B3CAD8;
+    position: fixed;
+    left: 40vw;
+    top: 12vh;
+    border-radius: 6px;
+    padding: 1.5vh 3vw;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    display: none;
+}
+.fade {
+    transition: opacity 0.5s ease-in-out;
+    opacity: 0;
+}
+
+#Copy_msg cpsuc{
+    /* text-align: center; */
+    color: #fffaf4;
+    position: absolute;
+    top: 2vh;
+    font-size: 3vh;
+    margin-left: 1vw;
+    font-weight: 800;
+}
+
+#Copy_msg img{
+    height: 5.5vh;
+}
+
+/* 统一圆角为中等（6px），折中视觉效果 */
+.rounded-md {
+    border-radius: 6px !important;
+}
+
+/* 兼容部分直接写 border-radius 的地方 */
+.bg-gray-50,
+article.bg-gray-50,
+#Copy_msg,
+.item button,
+input.rounded-md,
+button.rounded-md {
+    border-radius: 6px !important;
+}

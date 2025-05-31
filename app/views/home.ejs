@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Noda-clipboard</title>
+  <meta name="description" content="Noda-Clipboard：支持多剪切板、加密、定时自动清理，适合团队协作和个人跨设备使用的现代云剪切板。">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" type="image/x-icon" href="/images/favicon-32x32.ico" />
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center">
+  <main class="w-full max-w-md bg-white rounded-xl shadow-md p-8 mt-8">
+    <!-- 项目LOGO和名称 -->
+    <div class="flex flex-col items-center mb-6">
+      <div class="text-3xl font-extrabold text-blue-700 tracking-wide mb-1">Noda局域网剪切板</div>
+      <div class="text-sm text-gray-500">极简·安全·跨设备文字同步工具</div>
+    </div>
+    <!-- 新手友好说明 -->
+    <div class="mb-4 text-sm text-gray-600 bg-blue-50 rounded px-3 py-2">
+      无需注册，永久免费。输入剪切板ID和密码（可留空）即可在多设备间同步文本。
+    </div>
+    <form action="/clipboard/go" method="post" class="space-y-4">
+      <div class="flex gap-2 mb-4">
+        <input type="text" id="boardIdInput" name="boardId" placeholder="剪切板ID" required class="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <button type="button" id="randomIdBtn" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-full hover:bg-blue-200 transition">随机ID</button>
+      </div>
+      <input type="password" id="passwordInput" name="password" placeholder="密码（可留空，表示无密码）" class="w-full px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400">
+      <button id="submitBtn" type="submit" class="w-full bg-blue-600 text-white py-2 rounded-full hover:bg-blue-700 transition text-lg font-semibold">进入/创建剪切板</button>
+    </form>
+    <div class="mt-2 text-xs text-gray-500 text-center">
+      <div id="desc">密码可留空，表示该剪切板无密码保护。每条内容默认保存30分钟，除非你手动设置其它过期时间。</div>
+    </div>
+    <div class="mt-8 text-gray-500 text-sm text-center">
+      <div>最后发送时间：<span class="font-mono"><%= time %></span></div>
+      <div>目前内容数量：<span class="font-mono"><%= num %></span></div>
+    </div>
+    <!-- FAQ区域 -->
+    <div class="mt-8 text-xs text-gray-400 text-center border-t pt-4">
+      <div class="mb-1 font-semibold text-blue-700">常见问题</div>
+      <div>1. 剪切板内容自动过期删除，安全可靠。</div>
+      <div>2. 不需要注册，支持手机/电脑互传。</div>
+      <div>3. 适合团队协作、个人跨设备同步。</div>
+      <div class="mt-2 text-gray-300">项目名称：Noda局域网剪切板</div>
+    </div>
+    <script>
+      document.getElementById('randomIdBtn').onclick = function() {
+        const rand = Math.random().toString(36).slice(2, 8);
+        document.getElementById('boardIdInput').value = rand;
+      }
+    </script>
+  </main>
+</body>
+</html>

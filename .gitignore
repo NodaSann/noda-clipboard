@@ -1,0 +1,22 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+.DS_Store
+
+# VSCode
+.vscode/
+
+# 日志
+logs/
+*.log
+
+# 运行时
+*.pid
+*.seed
+*.pid.lock
+
+# 其他
+.idea/

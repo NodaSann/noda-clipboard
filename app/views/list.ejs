@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+  <meta charset="UTF-8">
+  <title>剪切板 <%= boardId %> - Noda Clipboard</title>
+  <meta name="description" content="多人协作、加密、定时自动清理的云剪切板 <%= boardId %>，安全分享，随时访问。">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta property="og:title" content="剪切板 <%= boardId %> - Noda Clipboard">
+  <meta property="og:description" content="多人协作、加密、定时自动清理的云剪切板 <%= boardId %>，安全分享，随时访问。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="<%= shareUrl %>">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" type="image/x-icon" href="/images/favicon-32x32.ico" />
+  <script src="/javascripts/clipboard.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center">
+  <main class="w-full max-w-5xl bg-white rounded-xl shadow-md p-6 mt-8 flex flex-col md:flex-row gap-6">
+    <div class="flex-1 min-w-0">
+      <!-- 项目LOGO和名称 -->
+      <div class="flex flex-col items-center mb-4">
+        <div class="text-2xl font-extrabold text-blue-700 tracking-wide mb-1">Noda局域网剪切板</div>
+        <div class="text-xs text-gray-500">极简·安全·跨设备文字同步工具</div>
+      </div>
+      <header class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold text-blue-700">剪切板：<span class="font-mono text-gray-700"><%= boardId %></span></h1>
+        <a href="/" class="text-sm text-blue-500 hover:underline">返回主页</a>
+      </header>
+      <div class="mb-3 text-sm text-gray-600 bg-blue-50 rounded px-3 py-2">
+        输入内容，点击发送即可同步到云端，支持跨设备复制粘贴。
+      </div>
+      <form action="/clipboard/<%= boardId %>/message" method="post" class="flex flex-col md:flex-row gap-2 mb-6">
+        <textarea id="msgInput" name="message" placeholder="输入内容，例如：网址、文本、代码等" required class="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
+        <input type="number" id="expireInput" name="expireMinutes" min="1" placeholder="过期(分钟)" class="w-32 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <button id="submitBtn" type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition font-semibold">发送</button>
+      </form>
+      <div class="mb-4 text-xs text-gray-400" id="desc">如不填写，内容默认保存30分钟。</div>
+      <section id="messages-list" class="space-y-4" aria-label="消息列表">
+        <div id="no-message-tip" class="text-center text-gray-400 text-lg py-8" style="display:none">
+          暂时还没有消息<br><span class="text-sm text-gray-300">你可以在上方输入内容并发送，支持文本、代码、网址等</span>
+        </div>
+        <% if (!(data.length === 1 && data[0].id === 313)) { %>
+          <% data.forEach(chunk => { %>
+            <article class="bg-gray-50 rounded-md shadow p-4 relative group">
+              <div class="text-gray-800 whitespace-pre-line break-words mb-2"><%= chunk.message %></div>
+              <footer class="flex justify-between items-center text-xs text-gray-400">
+                <span><%= chunk.date %></span>
+                <% if(chunk.id !== 313) { %>
+                  <div class="flex gap-2 items-center">
+                    <form action="/clipboard/<%= boardId %>/del/<%= chunk._id %>" method="get" class="inline">
+                      <button type="submit" class="text-red-500 hover:underline">删除</button>
+                    </form>
+                    <button class="copymsg text-blue-500 hover:underline" data-clipboard-text="<%= chunk.message.replace(/\"/g, '&quot;') %>">复制</button>
+                    <span class="text-gray-300 text-xs ml-1">复制到剪贴板</span>
+                  </div>
+                <% } %>
+              </footer>
+            </article>
+          <% }); %>
+        <% } %>
+      </section>
+      <div class="flex justify-end mt-2">
+        <button id="refresh-btn" class="text-xs text-blue-500 hover:underline">手动刷新</button>
+      </div>
+      <div id="Copy_msg" class="fixed left-1/2 top-16 -translate-x-1/2 bg-green-500 text-white px-6 py-2 rounded shadow-lg hidden transition-opacity duration-500">
+        复制成功
+      </div>
+    </div>
+    <!-- 右侧分享box -->
+    <aside class="w-full md:w-80 flex-shrink-0">
+      <div class="bg-gray-50 border border-gray-200 rounded-md p-4 flex flex-col items-center shadow-sm">
+        <div class="text-lg font-bold text-blue-700 mb-2">Noda局域网剪切板</div>
+        <div class="w-full flex items-center gap-2 mb-2">
+          <input id="share-link" type="text" readonly
+            class="flex-1 px-2 py-1 border rounded-md text-sm bg-gray-50"
+            value="<%= shareUrl %>">
+          <button id="copy-share-link" class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 text-sm">复制链接</button>
+        </div>
+        <div class="text-xs text-gray-400 mb-2">分享链接已自动包含密码，访问后可直接进入。</div>
+        <div id="qrcode-canvas" class="mb-1"></div>
+        <div class="text-xs text-gray-400">扫码在手机等设备打开</div>
+      </div>
+    </aside>
+  </main>
+  <script src="/javascripts/qrcode.min.js"></script>
+  <script>
+    // 生成二维码（qrcodejs用法）
+    window.addEventListener('DOMContentLoaded', function() {
+      var qrDiv = document.getElementById('qrcode-canvas');
+      if (window.QRCode && qrDiv) {
+        qrDiv.innerHTML = '';
+        new QRCode(qrDiv, {
+          text: '<%= shareUrl %>',
+          width: 120,
+          height: 120
+        });
+      }
+    });
+    const copyButtons = document.querySelectorAll('.copymsg');
+    const clipboard = new ClipboardJS(copyButtons);
+    clipboard.on('success', function(e) {
+      const msg = document.getElementById('Copy_msg');
+      msg.classList.remove('hidden');
+      msg.style.opacity = '1';
+      setTimeout(() => {
+        msg.style.opacity = '0';
+        setTimeout(() => msg.classList.add('hidden'), 500);
+      }, 1200);
+      e.clearSelection();
+    });
+    // 分享链接复制
+    document.getElementById('copy-share-link').onclick = function() {
+      const input = document.getElementById('share-link');
+      input.select();
+      document.execCommand('copy');
+      this.textContent = '已复制';
+      setTimeout(() => { this.textContent = '复制链接'; }, 1200);
+    };
+
+    // AJAX异步加载消息
+    async function loadMessages() {
+      const res = await fetch(`/clipboard/<%= boardId %>/api/messages`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const list = document.getElementById('messages-list');
+      // 先移除所有消息article
+      list.querySelectorAll('article').forEach(el => el.remove());
+      const tip = document.getElementById('no-message-tip');
+      if (data.length === 0) {
+        tip.style.display = '';
+      } else {
+        tip.style.display = 'none';
+        data.forEach(chunk => {
+          const article = document.createElement('article');
+          article.className = "bg-gray-50 rounded-md shadow p-4 relative group";
+          article.innerHTML = `
+            <div class="text-gray-800 whitespace-pre-line break-words mb-2">${chunk.message}</div>
+            <footer class="flex justify-between items-center text-xs text-gray-400">
+              <span>${chunk.date}</span>
+              <div class="flex gap-2">
+                <form action="/clipboard/<%= boardId %>/del/${chunk._id}" method="get" class="inline">
+                  <button type="submit" class="text-red-500 hover:underline">删除</button>
+                </form>
+                <button class="copymsg text-blue-500 hover:underline" data-clipboard-text="${chunk.message.replace(/\"/g, '&quot;')}">复制</button>
+              </div>
+            </footer>
+          `;
+          list.appendChild(article);
+        });
+      }
+      // 重新绑定复制功能
+      const copyButtons = document.querySelectorAll('.copymsg');
+      const clipboard = new ClipboardJS(copyButtons);
+      clipboard.on('success', function(e) {
+        const msg = document.getElementById('Copy_msg');
+        msg.classList.remove('hidden');
+        msg.style.opacity = '1';
+        setTimeout(() => {
+          msg.style.opacity = '0';
+          setTimeout(() => msg.classList.add('hidden'), 500);
+        }, 1200);
+        e.clearSelection();
+      });
+    }
+
+    // 定时自动刷新
+    setInterval(loadMessages, 5000);
+    // 手动刷新
+    document.getElementById('refresh-btn').onclick = loadMessages;
+
+    // 发送消息后自动刷新（表单提交后）
+    document.querySelector('form[action$="/message"]').addEventListener('submit', function(e) {
+      setTimeout(loadMessages, 1000);
+    });
+
+    // 页面初始时根据消息数量显示/隐藏无消息提示
+    window.addEventListener('DOMContentLoaded', function() {
+      const list = document.getElementById('messages-list');
+      const tip = document.getElementById('no-message-tip');
+      const hasMsg = list.querySelector('article');
+      tip.style.display = hasMsg ? 'none' : '';
+    });
+  </script>
+</body>
+</html>

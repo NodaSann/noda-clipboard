@@ -1,0 +1,8 @@
+  canvas {
+    display: block;
+    position: absolute;
+    z-index: 2;
+    right: -35px;
+    top: -35px;
+    background-color: #ffffff00;
+  }
