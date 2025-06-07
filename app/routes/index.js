@@ -72,6 +72,7 @@ router.post('/clipboard/:boardId/login', async function (req, res, next) {
   if ((typeof board.password === 'string' && board.password.length === 0 && (password === undefined || password === '')) ||
       (password && board.password && await bcrypt.compare(password, board.password))) {
     req.session[`auth_${boardId}`] = true;
+    if (password) req.session[`plain_pwd_${boardId}`] = password; // 保存明文密码到session
     await updateBoardAccess(boardId); // 更新访问时间
     res.redirect(`/clipboard/${boardId}/message`);
   } else {
@@ -89,17 +90,21 @@ router.get('/clipboard/:boardId/message', async function (req, res, next) {
   // 清理过期内容
   await messageModel.deleteMany({ boardId, expireAt: { $lte: new Date() } });
   const data = await messageModel.find({ boardId }).sort({ 'sortime': -1 }).limit(10);
-  // 生成带密码的分享链接
+  // 生成带明文密码的分享链接（仅当有密码时）
   const board = await boardModel.findOne({ boardId });
-  const shareUrl = board
-    ? `${req.protocol}://${req.get('host')}/clipboard/${boardId}?password=${encodeURIComponent(board.password)}`
-    : `${req.protocol}://${req.get('host')}/clipboard/${boardId}`;
+  let shareUrl;
+  if (board && typeof board.password === 'string' && board.password.length > 0) {
+    // 取 session 里的明文密码（如果有），否则不带密码参数
+    const sessionPwd = req.session[`plain_pwd_${boardId}`];
+    if (sessionPwd) {
+      shareUrl = `${req.protocol}://${req.get('host')}/clipboard/${boardId}?password=${encodeURIComponent(sessionPwd)}`;
+    } else {
+      shareUrl = `${req.protocol}://${req.get('host')}/clipboard/${boardId}`;
+    }
+  } else {
+    shareUrl = `${req.protocol}://${req.get('host')}/clipboard/${boardId}`;
+  }
   if (data.length === 0) {
-    //api
-    // res.status(400).json({
-    //   code: 4001,
-    //   msg: '查询失败'
-    // });
     const cuteEmoticonsMatrix =
       ["(◕‿◕)", "(◠‿◠)", "(◡‿◡)",
         "(◕ᴗ◕)", "(◉‿◉)", "(◕ᴥ◕)",
@@ -110,11 +115,7 @@ router.get('/clipboard/:boardId/message', async function (req, res, next) {
     res.render('list.ejs', { data, boardId, shareUrl })
     return;
   }
-  // res.send(data);
-  //\n 转换为 br
-  for (let i = 0; i < data.length; i++) {
-    data[i].message = data[i].message.replace(/\n/g, '<br>')
-  }
+  // 不再在后端做\n-><br>转换，直接传原始内容
   res.render('list.ejs', { data, boardId, shareUrl })
 });
 //ADD MESSAGE
@@ -164,6 +165,7 @@ router.post('/clipboard/go', async function(req, res, next) {
     await board.save();
     await updateBoardAccess(boardId);
     req.session[`auth_${boardId}`] = true;
+    if (password) req.session[`plain_pwd_${boardId}`] = password; // 保存明文密码到session
     res.redirect(`/clipboard/${boardId}/message`);
     return;
   }
@@ -172,6 +174,7 @@ router.post('/clipboard/go', async function(req, res, next) {
       (password && board.password && await bcrypt.compare(password, board.password))) {
     await updateBoardAccess(boardId);
     req.session[`auth_${boardId}`] = true;
+    if (password) req.session[`plain_pwd_${boardId}`] = password; // 保存明文密码到session
     res.redirect(`/clipboard/${boardId}/message`);
   } else {
     res.render('board_login', { boardId, error: '密码错误，无法进入已有剪切板' });

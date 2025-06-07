@@ -27,14 +27,17 @@
         <a href="/" class="text-sm text-blue-500 hover:underline">返回主页</a>
       </header>
       <div class="mb-3 text-sm text-gray-600 bg-blue-50 rounded px-3 py-2">
-        输入内容，点击发送即可同步到云端，支持跨设备复制粘贴。
+        输入内容，点击发送即可同步到云端，支持跨设备复制粘贴。<br>
+        <span class="text-blue-500">快捷键：Ctrl+Enter（Win/Linux）或 Cmd+Enter（Mac）可快速发送</span>
       </div>
       <form action="/clipboard/<%= boardId %>/message" method="post" class="flex flex-col md:flex-row gap-2 mb-6">
         <textarea id="msgInput" name="message" placeholder="输入内容，例如：网址、文本、代码等" required class="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
         <input type="number" id="expireInput" name="expireMinutes" min="1" placeholder="过期(分钟)" class="w-32 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
         <button id="submitBtn" type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition font-semibold">发送</button>
       </form>
-      <div class="mb-4 text-xs text-gray-400" id="desc">如不填写，内容默认保存30分钟。</div>
+      <div class="mb-4 text-xs text-gray-700 font-semibold bg-yellow-100 border border-yellow-300 rounded px-3 py-2 text-center" id="desc">
+        ⚠️ 如不填写，内容默认保存 <span class="font-bold text-orange-600">30分钟</span>。
+      </div>
       <section id="messages-list" class="space-y-4" aria-label="消息列表">
         <div id="no-message-tip" class="text-center text-gray-400 text-lg py-8" style="display:none">
           暂时还没有消息<br><span class="text-sm text-gray-300">你可以在上方输入内容并发送，支持文本、代码、网址等</span>
@@ -42,7 +45,7 @@
         <% if (!(data.length === 1 && data[0].id === 313)) { %>
           <% data.forEach(chunk => { %>
             <article class="bg-gray-50 rounded-md shadow p-4 relative group">
-              <div class="text-gray-800 whitespace-pre-line break-words mb-2"><%= chunk.message %></div>
+              <div class="text-gray-800 break-words mb-2"><%- chunk.message.replace(/\n/g, '<br>') %></div>
               <footer class="flex justify-between items-center text-xs text-gray-400">
                 <span><%= chunk.date %></span>
                 <% if(chunk.id !== 313) { %>
@@ -50,8 +53,10 @@
                     <form action="/clipboard/<%= boardId %>/del/<%= chunk._id %>" method="get" class="inline">
                       <button type="submit" class="text-red-500 hover:underline">删除</button>
                     </form>
-                    <button class="copymsg text-blue-500 hover:underline" data-clipboard-text="<%= chunk.message.replace(/\"/g, '&quot;') %>">复制</button>
-                    <span class="text-gray-300 text-xs ml-1">复制到剪贴板</span>
+                    <button class="copymsg text-blue-500 hover:underline flex items-center gap-1" data-clipboard-text="<%= chunk.message.replace(/\"/g, '&quot;') %>">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16h8M8 12h8m-7 8h6a2 2 0 002-2V7a2 2 0 00-2-2h-2.586a1 1 0 01-.707-.293l-1.414-1.414A1 1 0 0011.586 3H9a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                      <span>复制</span>
+                    </button>
                   </div>
                 <% } %>
               </footer>
@@ -83,103 +88,11 @@
     </aside>
   </main>
   <script src="/javascripts/qrcode.min.js"></script>
+  <script src="/javascripts/list.js"></script>
   <script>
-    // 生成二维码（qrcodejs用法）
-    window.addEventListener('DOMContentLoaded', function() {
-      var qrDiv = document.getElementById('qrcode-canvas');
-      if (window.QRCode && qrDiv) {
-        qrDiv.innerHTML = '';
-        new QRCode(qrDiv, {
-          text: '<%= shareUrl %>',
-          width: 120,
-          height: 120
-        });
-      }
-    });
-    const copyButtons = document.querySelectorAll('.copymsg');
-    const clipboard = new ClipboardJS(copyButtons);
-    clipboard.on('success', function(e) {
-      const msg = document.getElementById('Copy_msg');
-      msg.classList.remove('hidden');
-      msg.style.opacity = '1';
-      setTimeout(() => {
-        msg.style.opacity = '0';
-        setTimeout(() => msg.classList.add('hidden'), 500);
-      }, 1200);
-      e.clearSelection();
-    });
-    // 分享链接复制
-    document.getElementById('copy-share-link').onclick = function() {
-      const input = document.getElementById('share-link');
-      input.select();
-      document.execCommand('copy');
-      this.textContent = '已复制';
-      setTimeout(() => { this.textContent = '复制链接'; }, 1200);
-    };
-
-    // AJAX异步加载消息
-    async function loadMessages() {
-      const res = await fetch(`/clipboard/<%= boardId %>/api/messages`);
-      if (!res.ok) return;
-      const data = await res.json();
-      const list = document.getElementById('messages-list');
-      // 先移除所有消息article
-      list.querySelectorAll('article').forEach(el => el.remove());
-      const tip = document.getElementById('no-message-tip');
-      if (data.length === 0) {
-        tip.style.display = '';
-      } else {
-        tip.style.display = 'none';
-        data.forEach(chunk => {
-          const article = document.createElement('article');
-          article.className = "bg-gray-50 rounded-md shadow p-4 relative group";
-          article.innerHTML = `
-            <div class="text-gray-800 whitespace-pre-line break-words mb-2">${chunk.message}</div>
-            <footer class="flex justify-between items-center text-xs text-gray-400">
-              <span>${chunk.date}</span>
-              <div class="flex gap-2">
-                <form action="/clipboard/<%= boardId %>/del/${chunk._id}" method="get" class="inline">
-                  <button type="submit" class="text-red-500 hover:underline">删除</button>
-                </form>
-                <button class="copymsg text-blue-500 hover:underline" data-clipboard-text="${chunk.message.replace(/\"/g, '&quot;')}">复制</button>
-              </div>
-            </footer>
-          `;
-          list.appendChild(article);
-        });
-      }
-      // 重新绑定复制功能
-      const copyButtons = document.querySelectorAll('.copymsg');
-      const clipboard = new ClipboardJS(copyButtons);
-      clipboard.on('success', function(e) {
-        const msg = document.getElementById('Copy_msg');
-        msg.classList.remove('hidden');
-        msg.style.opacity = '1';
-        setTimeout(() => {
-          msg.style.opacity = '0';
-          setTimeout(() => msg.classList.add('hidden'), 500);
-        }, 1200);
-        e.clearSelection();
-      });
-    }
-
-    // 定时自动刷新
-    setInterval(loadMessages, 5000);
-    // 手动刷新
-    document.getElementById('refresh-btn').onclick = loadMessages;
-
-    // 发送消息后自动刷新（表单提交后）
-    document.querySelector('form[action$="/message"]').addEventListener('submit', function(e) {
-      setTimeout(loadMessages, 1000);
-    });
-
-    // 页面初始时根据消息数量显示/隐藏无消息提示
-    window.addEventListener('DOMContentLoaded', function() {
-      const list = document.getElementById('messages-list');
-      const tip = document.getElementById('no-message-tip');
-      const hasMsg = list.querySelector('article');
-      tip.style.display = hasMsg ? 'none' : '';
-    });
+    // 提供全局变量给list.js使用
+    window.boardId = '<%= boardId %>';
+    window.shareUrl = '<%= shareUrl %>';
   </script>
 </body>
 </html>
