@@ -4,6 +4,22 @@ Noda-Clipboard 是一个极简、跨设备、支持加密和定时自动清理�
 
 ---
 
+## 🖼️ 剪切板界面预览
+
+<div align="center">
+
+**移动端界面**
+
+<img src="./app/public/images/demo-mobile.png" alt="移动端界面" width="300" />
+
+**桌面端界面**
+
+<img src="./app/public/images/demo-desktop.png" alt="桌面端界面" width="600" />
+
+</div>
+
+---
+
 ## 🛠️ 技术栈
 
 - **Node.js** + **Express**：后端服务与 API
