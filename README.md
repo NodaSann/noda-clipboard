@@ -1,6 +1,6 @@
-# 🚀 Noda-Clipboard 社区版
+# 🚀 Noda-Clipboard 网络剪切板
 
-Noda-Clipboard 是一个极简、跨设备、支持加密和定时自动清理的云剪切板系统，适合团队协作和个人多端同步文本。**此为社区开源版本，欢迎贡献和二次开发！**
+Noda-Clipboard 是一个极简、跨设备、支持加密和定时自动清理的云剪切板系统，适合团队协作和个人多端同步文本。
 
 ---
 
@@ -30,7 +30,7 @@ Noda-Clipboard 是一个极简、跨设备、支持加密和定时自动清理�
 1. **克隆项目**
 
    ```powershell
-   git clone <your-github-repo-url>
+   git clone https://github.com/NodaSann/noda-clipboard.git
    cd app
    ```
 
